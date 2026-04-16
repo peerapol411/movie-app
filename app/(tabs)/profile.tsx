@@ -1,10 +1,11 @@
+import LoginScreen from '@/components/LoginScreen'
 import React from 'react'
-import { Text, View } from 'react-native'
+import { View } from 'react-native'
 
 const profile = () => {
   return (
-    <View>
-      <Text>profile</Text>
+    <View className='bg-primary flex-1 px-10'>
+      <LoginScreen isLogin={false} />
     </View>
   )
 }
