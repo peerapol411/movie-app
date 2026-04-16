@@ -22,6 +22,6 @@ This project was built as a hands-on journey to master **React Native** and expl
 The primary goal of this project was to learn mobile development fundamentals:
 - [x] Structuring a React Native project using **Expo**.
 - [x] Building responsive mobile UIs with Flexbox.
-- [x] Integrating third-party APIs for movie data.
+- [x] Integrating third-party APIs (tmdb) for movie data.
 - [x] Implementing user authentication and data persistence with **Appwrite**.
 - [x] Handling mobile-specific features like image caching and list rendering.
