@@ -1,50 +1,27 @@
-# Welcome to your Expo app 👋
+# Movie App - React Native Learning Project
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A mobile application designed for movie enthusiasts to discover, search, and manage their favorite films.
+This project was built as a hands-on journey to master **React Native** and explore backend integration with **Appwrite**.
 
-## Get started
+## 📱 Features
 
-1. Install dependencies
+- **Trending Movies:** Stay updated with a curated list of currently popular films.
+- **Search Functionality:** Find any movie using the search bar with real-time results.
+- **Bookmarks & Favorites:** Save movies to your personal library for quick access later.
+- **Movie Details:** View in-depth information including synopses, ratings, and release dates.
 
-   ```bash
-   npm install
-   ```
+## 🛠 Tech Stack
 
-2. Start the app
+- **Frontend:** React Native (with Expo SDK)
+- **Backend-as-a-Service:** Appwrite (Authentication, Database, and Storage)
+- **Navigation:** React Navigation / Expo Router
+- **State Management:** (e.g., React Context API or Zustand)
 
-   ```bash
-   npx expo start
-   ```
+## 🎯 Learning Objectives
 
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+The primary goal of this project was to learn mobile development fundamentals:
+- [x] Structuring a React Native project using **Expo**.
+- [x] Building responsive mobile UIs with Flexbox.
+- [x] Integrating third-party APIs for movie data.
+- [x] Implementing user authentication and data persistence with **Appwrite**.
+- [x] Handling mobile-specific features like image caching and list rendering.
