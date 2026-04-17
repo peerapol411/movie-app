@@ -4,8 +4,16 @@ import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { Image, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
+const userInfoInit: userInfo = {
+    username: '',
+    email: '',
+    password: '',
+}
+
 const index = () => {
     const [showPassword, setShowPassword] = useState<boolean>(false);
+    const [userRegister, setUserRegister] = useState<userInfo>(userInfoInit)
+
     return (
         <View className='bg-primary flex-1 px-10'>
             <View className='mt-20 gap-2'>
@@ -26,6 +34,17 @@ const index = () => {
                         placeholder='Username'
                         placeholderTextColor={'#999'}
                         className='bg-white rounded-full px-4 py-2 w-full h-14 pl-12 pr-12'
+                        value={userRegister.username}
+                        onChangeText={(text) => {
+                            if (text.length > 15) {
+                                return;
+                            } else {
+                                setUserRegister((prev) => ({
+                                    ...prev,
+                                    username: text,
+                                }))
+                            }
+                        }}
                     />
                 </View>
                 <View className='relative h-14'>

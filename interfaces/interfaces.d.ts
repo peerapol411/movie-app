@@ -75,3 +75,9 @@ interface TrendingCardProps {
   movie: TrendingMovie;
   index: number;
 }
+
+interface userInfo {
+  username: string;
+  email: string;
+  password: string;
+}
