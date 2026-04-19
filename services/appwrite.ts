@@ -1,4 +1,5 @@
-import { Account, Client, Databases, ID, Query } from 'react-native-appwrite';
+import CryptoJS from 'crypto-js';
+import { Client, Databases, ID, Permission, Query, Role } from 'react-native-appwrite';
 // track the search made by user
 
 const DATABASE_ID = process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!;
@@ -50,15 +51,23 @@ export const getTrendingMovies = async (): Promise<TrendingMovie[] | undefined> 
     }
 }
 
-export const saveUserRegister = async (username: string, email: string, password: string) => {
+export const saveUserRegister = async (register: userInfo) => {
     try {
-        const account = new Account(client);
+        if (!register.password || typeof register.password !== 'string') {
+            return 'Error:InvalidPassword';
+        }
+        if (!register.email || typeof register.email !== 'string') {
+            return 'Error:InvalidEmail';
+        }
+        if (!register.username || typeof register.username !== 'string') {
+            return 'Error:InvalidUsername';
+        }
 
-        const resultDuplicateUsername = await database.listDocuments(DATABASE_ID, COLLECTION_ID, [
-            Query.equal('username', username)
+        const resultDuplicateUsername = await database.listDocuments(DATABASE_ID, COLLECTION_USERS_ID, [
+            Query.equal('username', register.username)
         ]);
-        const resultDuplicateEmail = await database.listDocuments(DATABASE_ID, COLLECTION_ID, [
-            Query.equal('email', email)
+        const resultDuplicateEmail = await database.listDocuments(DATABASE_ID, COLLECTION_USERS_ID, [
+            Query.equal('email', register.email.toLocaleLowerCase())
         ]);
 
         if (resultDuplicateUsername.documents.length > 0) {
@@ -67,11 +76,20 @@ export const saveUserRegister = async (username: string, email: string, password
             return 'Error:DuplicatedEmail'
         }
 
-        const response = await account.create(
+        const hashedPassword = CryptoJS.SHA256(register.password).toString();
+
+        const response = await database.createDocument(
+            DATABASE_ID,
+            COLLECTION_USERS_ID,
             ID.unique(),
-            username,
-            email,
-            password,
+            {
+                username: register.username,
+                email: register.email.toLocaleLowerCase(),
+                password_hash: hashedPassword,
+            },
+            [
+                Permission.write(Role.any()),
+            ]
         );
 
         return response.$id

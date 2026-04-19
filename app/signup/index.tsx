@@ -1,4 +1,5 @@
 import { icons } from '@/constants/icons';
+import { saveUserRegister } from '@/services/appwrite';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
@@ -13,6 +14,20 @@ const userInfoInit: userInfo = {
 const index = () => {
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [userRegister, setUserRegister] = useState<userInfo>(userInfoInit)
+    const [emailError, setEmailError] = useState<boolean>(false)
+    const [passwordError, setPasswordError] = useState<boolean>(false)
+
+    const validateEmail = (email: string): boolean => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    }
+
+    const validatePassword = (password: string): boolean => {
+        if(password.length < 8 || password.length > 256){
+            return false;
+        }
+        return true;
+    }
 
     return (
         <View className='bg-primary flex-1 px-10'>
@@ -55,6 +70,14 @@ const index = () => {
                         placeholder='Email'
                         placeholderTextColor={'#999'}
                         className='bg-white rounded-full px-4 py-2 w-full h-14 pl-12 pr-12'
+                        style={{ borderColor: emailError ? 'red' : 'white', borderWidth: 1 }}
+                        onChangeText={(text) => {
+                            setUserRegister((prev) => ({
+                                ...prev,
+                                email: text,
+                            }))
+                            setEmailError(text === '' ? false : !validateEmail(text))
+                        }}
                     />
                 </View>
                 <View className='relative h-14'>
@@ -65,8 +88,15 @@ const index = () => {
                         placeholder='Password'
                         placeholderTextColor={'#999'}
                         className='bg-white rounded-full px-4 py-2 w-full h-14 pl-12 pr-12'
+                        style={{ borderColor: passwordError ? 'red' : 'white', borderWidth: 1 }}
                         secureTextEntry={!showPassword}
-                        onChange={() => setShowPassword(false)}
+                        onChangeText={(text) => {
+                            setUserRegister((prev) => ({
+                                ...prev,
+                                password: text,
+                            }))
+                            setPasswordError(text === '' ? false : !validatePassword(text))
+                        }}
                     />
                     <TouchableOpacity
                         className='absolute right-4 h-14 justify-center z-10'
@@ -79,7 +109,13 @@ const index = () => {
                         />
                     </TouchableOpacity>
                 </View>
-                <TouchableOpacity className='rounded-full h-14 w-full justify-center items-center bg-accent flex-row gap-2'>
+                <TouchableOpacity
+                    className='rounded-full h-14 w-full justify-center items-center bg-accent flex-row gap-2'
+                    onPress={async () => {
+                        const result = await saveUserRegister(userRegister);
+                        if(result) router.back();
+                    }}
+                >
                     <Text className='text-black font-bold text-xl'>Sign Up</Text>
                     <Ionicons name="arrow-forward" size={20} color="black" />
                 </TouchableOpacity>

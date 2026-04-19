@@ -66,7 +66,7 @@ const LoginScreen = ({ isLogin }: LoginScreenProps) => {
                 </Text>
                 <Ionicons name="arrow-forward" size={20} color="black" />
             </TouchableOpacity>
-            <View className='flex-row items-center my-5'>
+            <View className='flex-row items-center my-10'>
                 <View className='flex-1 h-px bg-gray-400' />
                 <Text className='mx-3 text-light-300 text-sm'>
                     OR CONTINUE WITH
