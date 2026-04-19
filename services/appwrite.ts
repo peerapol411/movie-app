@@ -99,3 +99,24 @@ export const saveUserRegister = async (register: userInfo) => {
         throw error;
     }
 }
+
+export const loginWithUsername = async (userLogin: userLogin): Promise<userInfomationLogin | string> => {
+    try {
+        const result = await database.listDocuments(DATABASE_ID, COLLECTION_USERS_ID, [
+            Query.equal('username', userLogin.username)
+        ]);
+        if (result.documents.length > 0) {
+            const hashPasswordLogin = CryptoJS.SHA256(userLogin.password).toString();
+            if (hashPasswordLogin === result.documents[0].password_hash) {
+                return "OK"
+            } else {
+                return "Error: Invalid password"
+            }
+        } else {
+            return "Error: Invalid username"
+        }
+    } catch (error) {
+        console.error('Error fetching trending movies:', error);
+        return "Error: Database disconnected!";
+    }
+}

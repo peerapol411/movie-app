@@ -1,4 +1,5 @@
 import { icons } from '@/constants/icons'
+import { loginWithUsername } from '@/services/appwrite'
 import { Ionicons } from '@expo/vector-icons'
 import { router } from 'expo-router'
 import React from 'react'
@@ -6,14 +7,33 @@ import { Image, Text, TextInput, TouchableOpacity, View } from 'react-native'
 
 
 interface LoginScreenProps {
-    isLogin: boolean
+    setIsLogin: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
+const initUserLogin: userLogin = {
+    username: '',
+    password: '',
+}
 
-const LoginScreen = ({ isLogin }: LoginScreenProps) => {
+const LoginScreen = ({ setIsLogin }: LoginScreenProps) => {
+    const [userLogin, setUserLogin] = React.useState<userLogin>(initUserLogin);
+
     const [showPassword, setShowPassword] = React.useState(false)
 
-    return !isLogin ? (
+    const handleLogin = async () => {
+        try {
+            const result = await loginWithUsername(userLogin);
+            if (result === "OK") {
+                setIsLogin(true);
+            } else {
+                alert(result);
+            }
+        } catch (error) {
+            console.error("Login failed:", error);
+        }
+    }
+
+    return (
         <View>
             <View className='items-center mt-20'>
                 <Image source={icons.logo} className='size-15' />
@@ -33,6 +53,14 @@ const LoginScreen = ({ isLogin }: LoginScreenProps) => {
                         placeholder='Username'
                         placeholderTextColor={'#999'}
                         className='bg-white rounded-lg px-4 py-2 w-full h-14 pl-12 pr-12'
+                        onChangeText={(text) => {
+                            setUserLogin((prev) => {
+                                return {
+                                    ...prev,
+                                    username: text,
+                                }
+                            })
+                        }}
                     />
                 </View>
                 <View className='mt-4'>
@@ -45,7 +73,14 @@ const LoginScreen = ({ isLogin }: LoginScreenProps) => {
                             placeholderTextColor={'#999'}
                             className='bg-white rounded-lg px-4 py-2 w-full h-14 pl-12 pr-12'
                             secureTextEntry={!showPassword}
-                            onChange={() => setShowPassword(false)}
+                            onChangeText={(text) => {
+                                setUserLogin((prev) => {
+                                    return {
+                                        ...prev,
+                                        password: text,
+                                    }
+                                })
+                            }}
                         />
                         <TouchableOpacity
                             className='absolute right-4 h-14 justify-center z-10'
@@ -60,7 +95,10 @@ const LoginScreen = ({ isLogin }: LoginScreenProps) => {
                     </View>
                 </View>
             </View>
-            <TouchableOpacity className='bg-accent rounded-lg py-3 mt-5 items-center justify-center flex-row gap-2'>
+            <TouchableOpacity
+                className='bg-accent rounded-lg py-3 mt-5 items-center justify-center flex-row gap-2'
+                onPress={handleLogin}
+            >
                 <Text className='color-primary font-bold text-xl'>
                     Login
                 </Text>
@@ -83,13 +121,13 @@ const LoginScreen = ({ isLogin }: LoginScreenProps) => {
                 Don't have an account?
                 <Text
                     className='color-accent'
-                    onPress={() => router.push('/signup') }
+                    onPress={() => router.push('/signup')}
                 >
-                   {' '}Sign Up
+                    {' '}Sign Up
                 </Text>
             </Text>
         </View>
-    ) : null
+    )
 }
 
 export default LoginScreen

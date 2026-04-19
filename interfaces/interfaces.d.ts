@@ -81,3 +81,13 @@ interface userInfo {
   email: string;
   password: string;
 }
+
+interface userLogin {
+  username: string;
+  password: string;
+}
+
+interface userInfomationLogin {
+  username: string;
+  email: string
+}
