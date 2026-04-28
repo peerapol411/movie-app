@@ -51,6 +51,28 @@ export const getTrendingMovies = async (): Promise<TrendingMovie[] | undefined> 
     }
 }
 
+export const getUserInformation = async (username: string): Promise<userInfomationLogin | undefined> => {
+    try {
+        const result = await database.listDocuments(DATABASE_ID, COLLECTION_USERS_ID, [
+            Query.equal('username', username)
+        ]);
+
+        // 1. Check if we actually found a user
+        if (result.documents.length === 0) {
+            console.log('No user found for username:', username);
+            return undefined;
+        }
+
+        // 2. Return the FIRST document in the array
+        // We cast it to 'any' then to your type to satisfy TypeScript
+        return result.documents[0] as unknown as userInfomationLogin;
+
+    } catch (error) {
+        console.log('Error get user information: ', error);
+        return undefined;
+    }
+}
+
 export const saveUserRegister = async (register: userInfo) => {
     try {
         if (!register.password || typeof register.password !== 'string') {

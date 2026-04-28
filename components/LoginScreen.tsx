@@ -8,6 +8,7 @@ import { Image, Text, TextInput, TouchableOpacity, View } from 'react-native'
 
 interface LoginScreenProps {
     setIsLogin: React.Dispatch<React.SetStateAction<boolean>>;
+    usernameCallback: (username: string) => void 
 }
 
 const initUserLogin: userLogin = {
@@ -15,15 +16,15 @@ const initUserLogin: userLogin = {
     password: '',
 }
 
-const LoginScreen = ({ setIsLogin }: LoginScreenProps) => {
+const LoginScreen = ({ setIsLogin, usernameCallback }: LoginScreenProps) => {
     const [userLogin, setUserLogin] = React.useState<userLogin>(initUserLogin);
-
     const [showPassword, setShowPassword] = React.useState(false)
 
     const handleLogin = async () => {
         try {
             const result = await loginWithUsername(userLogin);
             if (result === "OK") {
+                usernameCallback(userLogin.username);
                 setIsLogin(true);
             } else {
                 alert(result);

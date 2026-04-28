@@ -91,3 +91,10 @@ interface userInfomationLogin {
   username: string;
   email: string
 }
+
+interface savedMovie {
+  movie_id: number;
+  title: string;
+  poster_url: string;
+  total: number;
+}
