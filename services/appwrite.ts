@@ -1,10 +1,11 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import CryptoJS from 'crypto-js';
 import { Client, Databases, ID, Permission, Query, Role } from 'react-native-appwrite';
-// track the search made by user
 
 const DATABASE_ID = process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!;
 const COLLECTION_ID = process.env.EXPO_PUBLIC_APPWRITE_COLLECTION_ID!;
 const COLLECTION_USERS_ID = process.env.EXPO_PUBLIC_APPWRITE_COLLECTION_USERS_ID!;
+const COLLECTION_SAVED_ID = process.env.EXPO_PUBLIC_APPWIRTE_COLLECTION_SAVED_ID!;
 
 const client = new Client()
     .setEndpoint(process.env.EXPO_PUBLIC_APPWRITE_ENDPOINT!)
@@ -51,7 +52,7 @@ export const getTrendingMovies = async (): Promise<TrendingMovie[] | undefined> 
     }
 }
 
-export const getUserInformation = async (username: string): Promise<userInfomationLogin | undefined> => {
+export const getUserInformation = async (username: string): Promise<UserInfomationLogin | undefined> => {
     try {
         const result = await database.listDocuments(DATABASE_ID, COLLECTION_USERS_ID, [
             Query.equal('username', username)
@@ -65,7 +66,7 @@ export const getUserInformation = async (username: string): Promise<userInfomati
 
         // 2. Return the FIRST document in the array
         // We cast it to 'any' then to your type to satisfy TypeScript
-        return result.documents[0] as unknown as userInfomationLogin;
+        return result.documents[0] as unknown as UserInfomationLogin;
 
     } catch (error) {
         console.log('Error get user information: ', error);
@@ -73,7 +74,7 @@ export const getUserInformation = async (username: string): Promise<userInfomati
     }
 }
 
-export const saveUserRegister = async (register: userInfo) => {
+export const saveUserRegister = async (register: UserInfo) => {
     try {
         if (!register.password || typeof register.password !== 'string') {
             return 'Error:InvalidPassword';
@@ -122,7 +123,7 @@ export const saveUserRegister = async (register: userInfo) => {
     }
 }
 
-export const loginWithUsername = async (userLogin: userLogin): Promise<userInfomationLogin | string> => {
+export const loginWithUsername = async (userLogin: UserLogin): Promise<UserInfomationLogin | string> => {
     try {
         const result = await database.listDocuments(DATABASE_ID, COLLECTION_USERS_ID, [
             Query.equal('username', userLogin.username)
@@ -140,5 +141,42 @@ export const loginWithUsername = async (userLogin: userLogin): Promise<userInfom
     } catch (error) {
         console.error('Error fetching trending movies:', error);
         return "Error: Database disconnected!";
+    }
+}
+
+export const saveFavoriteMovies = async (movie: SavedMovie) => {
+    try {
+        const userSession = await AsyncStorage.getItem('user_session');
+        const parsedData = JSON.parse(userSession ?? '');
+
+
+        const response = await database.createDocument(
+            DATABASE_ID,
+            COLLECTION_SAVED_ID,
+            ID.unique(),
+            {
+                movie_id: movie?.movie_id,
+                title: movie?.title,
+                poster_url: `https://image.tmdb.org/t/p/w500${movie.poster_url}`,
+                createdBy: parsedData.username,
+            }
+        );
+
+        return { status: 200, data: response, message: 'success' };
+    } catch (error) {
+        console.error('Error save favorite movies:', error);
+        throw error;
+    }
+}
+
+export const getSavedMovies = async (username: string): Promise<SavedMovie[] | undefined> => {
+    try {
+        const result = await database.listDocuments(DATABASE_ID, COLLECTION_SAVED_ID, [
+            Query.equal('createdBy', username)
+        ]);
+        return result.documents as unknown as SavedMovie[];
+    } catch (error) {
+        console.log('Error get saved movies: ', error)
+        throw undefined;
     }
 }

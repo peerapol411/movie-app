@@ -76,23 +76,23 @@ interface TrendingCardProps {
   index: number;
 }
 
-interface userInfo {
+interface UserInfo {
   username: string;
   email: string;
   password: string;
 }
 
-interface userLogin {
+interface UserLogin {
   username: string;
   password: string;
 }
 
-interface userInfomationLogin {
+interface UserInfomationLogin {
   username: string;
   email: string
 }
 
-interface savedMovie {
+interface SavedMovie {
   movie_id: number;
   title: string;
   poster_url: string;

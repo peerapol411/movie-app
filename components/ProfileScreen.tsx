@@ -1,30 +1,33 @@
-import { getUserInformation } from '@/services/appwrite';
+import { getSavedMovies, getUserInformation } from '@/services/appwrite';
 import { Ionicons } from '@expo/vector-icons';
-import React, { useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from 'expo-router';
+import React, { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface ProfileScreenProps {
     isLogin: boolean;
     setIsLogin: React.Dispatch<React.SetStateAction<boolean>>;
-    username: string;
 }
 
-const initUserData: userInfomationLogin = {
+const initUserData: UserInfomationLogin = {
     username: '',
     email: '',
 }
 
-const ProfileScreen = ({ isLogin, setIsLogin, username }: ProfileScreenProps) => {
-    const [userData, setUserData] = useState<userInfomationLogin>(initUserData);
-    const [savedMovies, setSavedMovies] = useState<savedMovie[]>([])
+const ProfileScreen = ({ isLogin, setIsLogin }: ProfileScreenProps) => {
+    const [userData, setUserData] = useState<UserInfomationLogin>(initUserData);
+    const [savedMovies, setSavedMovies] = useState<SavedMovie[]>([])
 
     useEffect(() => {
         // Create an internal async function
         const fetchUserData = async () => {
-            if (isLogin && username) {
+            const userSession = await AsyncStorage.getItem('user_session');
+            const parsedData = JSON.parse(userSession ?? '');
+            if (isLogin && parsedData.username) {
                 try {
-                    const result = await getUserInformation(username);
-                    setUserData(result as userInfomationLogin); // Save it to state to use in your UI
+                    const result = await getUserInformation(parsedData.username);
+                    setUserData(result as UserInfomationLogin); // Save it to state to use in your UI
                 } catch (error) {
                     console.error('Failed to fetch user:', error);
                 }
@@ -32,9 +35,23 @@ const ProfileScreen = ({ isLogin, setIsLogin, username }: ProfileScreenProps) =>
         };
 
         fetchUserData();
-    }, [isLogin, username]); // Run when login status or username changes
+    }, [isLogin]);
 
-    console.log('userData', userData?.email, userData?.username)
+    useFocusEffect(
+        useCallback(() => {
+            const fetchMovies = async () => {
+                if (userData?.username) {
+                    const response = await getSavedMovies(userData.username);
+                    const result: SavedMovie[] = response?.map((v) => {
+                        return { movie_id: v.movie_id, title: v.title, poster_url: v.poster_url, total: response.length } as SavedMovie
+                    }) ?? [];
+                    setSavedMovies(result ?? [])
+                }
+            };
+
+            fetchMovies();
+        }, [userData.username])
+    );
 
     const styles = StyleSheet.create({
         avatar: {
@@ -97,10 +114,17 @@ const ProfileScreen = ({ isLogin, setIsLogin, username }: ProfileScreenProps) =>
                     <Text style={{ fontSize: 48, color: "#AB8BFF" }}>{savedMovies.length ?? 0}</Text>
                     <Text className='text-neutral-400 font-bold text-xl'>SAVED</Text>
                 </View>
-                <TouchableOpacity style={styles.logout} onPress={() => {
-                    setUserData(initUserData)
-                    setIsLogin(false)
-                }}>
+                <TouchableOpacity
+                    style={styles.logout}
+                    onPress={async () => {
+                        try {
+                            await AsyncStorage.removeItem('user_session');
+                            setUserData(initUserData)
+                            setIsLogin(false);
+                        } catch (error) {
+                            console.error('Error clearing session:', error);
+                        }
+                    }}>
                     <View style={{ flexDirection: "row", marginLeft: 24, }}>
                         <View style={{
                             width: 50,
@@ -110,7 +134,7 @@ const ProfileScreen = ({ isLogin, setIsLogin, username }: ProfileScreenProps) =>
                             alignItems: 'center',
                             justifyContent: "center"
                         }}>
-                            <Ionicons name='log-out-outline' size={40} color={'#FF5C5C'} style={{marginLeft: 8}} />
+                            <Ionicons name='log-out-outline' size={40} color={'#FF5C5C'} style={{ marginLeft: 8 }} />
                         </View>
                         <View style={{ flexDirection: "column", marginLeft: 16 }}>
                             <Text style={{ fontWeight: 600, fontSize: 22, color: "#FF5C5C" }}>Logout</Text>

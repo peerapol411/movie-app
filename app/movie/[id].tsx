@@ -1,8 +1,11 @@
 import { icons } from '@/constants/icons'
 import { fetchMovieDetails } from '@/services/api'
+import { getSavedMovies, saveFavoriteMovies } from '@/services/appwrite'
 import useFetch from '@/services/useFetch'
-import { router, useLocalSearchParams } from 'expo-router'
-import React from 'react'
+import { Ionicons } from '@expo/vector-icons'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router'
+import React, { useCallback, useEffect, useState } from 'react'
 import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native'
 
 interface MovieInfoProps {
@@ -21,8 +24,52 @@ const MovieInfo = ({ label, value }: MovieInfoProps) => {
 
 const MovieDetails = () => {
   const { id } = useLocalSearchParams()
-
   const { data: movie, loading } = useFetch(() => fetchMovieDetails(id as string));
+
+  const [userInfo, setUserInfo] = useState<{
+    username: string,
+    isLoggedIn: boolean,
+    loginDate: Date | null
+  }>({
+    username: '',
+    isLoggedIn: false,
+    loginDate: null,
+  });
+
+  const [savedMovies, setSavedMovies] = useState<SavedMovie[]>([])
+
+  useEffect(() => {
+    // Create an internal async function
+    const fetchUserData = async () => {
+      const userSession = await AsyncStorage.getItem('user_session');
+      if (userSession) {
+        const parsedData = JSON.parse(userSession ?? '');
+        setUserInfo({ username: parsedData.username, isLoggedIn: parsedData.isLoggedIn, loginDate: parsedData.loginDate })
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  const handleSavedMovies = async () => {
+    const response = await getSavedMovies(userInfo.username);
+    const result: SavedMovie[] = response?.map((v) => {
+      return { movie_id: v.movie_id, title: v.title, poster_url: v.poster_url, total: response.length } as SavedMovie
+    }) ?? [];
+    setSavedMovies(result ?? [])
+  }
+
+  useFocusEffect(
+    useCallback(() => {
+      const fetchMovies = async () => {
+        if (userInfo?.username) {
+          handleSavedMovies();
+        }
+      };
+
+      fetchMovies();
+    }, [userInfo.username])
+  );
 
   return (
     <View className='bg-primary flex-1'>
@@ -36,7 +83,28 @@ const MovieDetails = () => {
             resizeMode='stretch' />
         </View>
         <View className='flex-col items-start justify-center mt-5 px-5'>
-          <Text className='text-white font-bold text-xl'>{movie?.title}</Text>
+          <View style={{
+            width: '100%',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}>
+            <Text className='text-white font-bold text-xl'>{movie?.title}</Text>
+            {userInfo.isLoggedIn && !loading &&
+              <Ionicons name={savedMovies?.some((v) => v.movie_id.toString() === id) ? 'bookmark' : 'bookmark-outline'}
+                color={'#AB8BFF'}
+                size={30}
+                onPress={async () => {
+                  const result = await saveFavoriteMovies({
+                    movie_id: movie?.id,
+                    title: movie?.title,
+                    poster_url: movie?.poster_path
+                  } as SavedMovie);
+                  
+                  handleSavedMovies();
+                }}
+              />}
+          </View>
           <View className='flex-row items-center gap-x-1 mt-2'>
             <Text className='text-light-200 text-sm'>
               {movie?.release_date?.split('-')[0]}
@@ -64,7 +132,7 @@ const MovieDetails = () => {
             />
             <MovieInfo
               label='Revenue'
-              value={ movie?.revenue ? `$${Math.round(movie?.revenue ?? 0)}` : 'N/A'} />
+              value={movie?.revenue ? `$${Math.round(movie?.revenue ?? 0)}` : 'N/A'} />
           </View>
           <MovieInfo
             label='Production Companies'

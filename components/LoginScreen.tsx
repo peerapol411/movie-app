@@ -1,6 +1,7 @@
 import { icons } from '@/constants/icons'
 import { loginWithUsername } from '@/services/appwrite'
 import { Ionicons } from '@expo/vector-icons'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { router } from 'expo-router'
 import React from 'react'
 import { Image, Text, TextInput, TouchableOpacity, View } from 'react-native'
@@ -8,23 +9,29 @@ import { Image, Text, TextInput, TouchableOpacity, View } from 'react-native'
 
 interface LoginScreenProps {
     setIsLogin: React.Dispatch<React.SetStateAction<boolean>>;
-    usernameCallback: (username: string) => void 
 }
 
-const initUserLogin: userLogin = {
+const initUserLogin: UserLogin = {
     username: '',
     password: '',
 }
 
-const LoginScreen = ({ setIsLogin, usernameCallback }: LoginScreenProps) => {
-    const [userLogin, setUserLogin] = React.useState<userLogin>(initUserLogin);
+const LoginScreen = ({ setIsLogin }: LoginScreenProps) => {
+    const [userLogin, setUserLogin] = React.useState<UserLogin>(initUserLogin);
     const [showPassword, setShowPassword] = React.useState(false)
 
     const handleLogin = async () => {
         try {
             const result = await loginWithUsername(userLogin);
             if (result === "OK") {
-                usernameCallback(userLogin.username);
+
+                const userSession = {
+                    username: userLogin.username,
+                    isLoggedIn: true,
+                    loginDate: new Date().toISOString()
+                };
+
+                await AsyncStorage.setItem('user_session', JSON.stringify(userSession));
                 setIsLogin(true);
             } else {
                 alert(result);

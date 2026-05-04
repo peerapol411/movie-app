@@ -5,7 +5,7 @@ import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { Image, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-const userInfoInit: userInfo = {
+const userInfoInit: UserInfo = {
     username: '',
     email: '',
     password: '',
@@ -13,7 +13,7 @@ const userInfoInit: userInfo = {
 
 const index = () => {
     const [showPassword, setShowPassword] = useState<boolean>(false);
-    const [userRegister, setUserRegister] = useState<userInfo>(userInfoInit)
+    const [userRegister, setUserRegister] = useState<UserInfo>(userInfoInit)
     const [emailError, setEmailError] = useState<boolean>(false)
     const [passwordError, setPasswordError] = useState<boolean>(false)
 
@@ -23,7 +23,7 @@ const index = () => {
     }
 
     const validatePassword = (password: string): boolean => {
-        if(password.length < 8 || password.length > 256){
+        if (password.length < 8 || password.length > 256) {
             return false;
         }
         return true;
@@ -113,7 +113,7 @@ const index = () => {
                     className='rounded-full h-14 w-full justify-center items-center bg-accent flex-row gap-2'
                     onPress={async () => {
                         const result = await saveUserRegister(userRegister);
-                        if(result) router.back();
+                        if (result) router.back();
                     }}
                 >
                     <Text className='text-black font-bold text-xl'>Sign Up</Text>
