@@ -172,7 +172,8 @@ export const saveFavoriteMovies = async (movie: SavedMovie) => {
 export const getSavedMovies = async (username: string): Promise<SavedMovie[] | undefined> => {
     try {
         const result = await database.listDocuments(DATABASE_ID, COLLECTION_SAVED_ID, [
-            Query.equal('createdBy', username)
+            Query.equal('createdBy', username),
+            Query.orderDesc('$createdAt')
         ]);
         return result.documents as unknown as SavedMovie[];
     } catch (error) {
